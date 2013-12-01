@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Knobicon Example</title>
+</head>
+<body>
+  <div id='knob1'></div>
+  <div id='knob2'></div>
+  <script src='../src/knobicon.js'></script>
+  <script>
+    var knob1 = new Knobicon({pointerImgSrc: 'img/pointer.png',
+                             knobImgSrc: 'img/knob.png',
+                             width: 300,
+                             height: 300
+                           }),
+        knob2 = new Knobicon({
+          pointerImgSrc: 'img/VolumePointer.png',
+          knobImgSrc: 'img/VolumeKnob.png',
+          width: 200,
+          height: 200
+        });
+    knob1.appendTo('knob1');
+    knob2.appendTo('knob2');
+  </script>
+</body>
+</html>
