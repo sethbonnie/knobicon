@@ -12,39 +12,57 @@ describe('Knobicon', function() {
   });
 
   describe('when called with just required params', function() {
+    var knob;
+
     it('should throw error when sources are not strings', function() {
       expect(function(){Knobicon(1, 2)}).toThrow();
     });
 
     it("should load up the correct images", function(){
       var knobImg = new Image(),
-          pointerImg = new Image(),
-          knob = new Knobicon('img/knob.png', 'img/pointer.png');
+          pointerImg = new Image();
       knobImg.src = 'img/knob.png';
       pointerImg.src = 'img/pointer.png';
+      
+      knob = new Knobicon('img/knob.png', 'img/pointer.png');
 
-      expect(knob.knob.src).toEqual(knobImg.src);
-      expect(knob.pointer.src).toEqual(pointerImg.src);
+      waitsFor(function() {
+        return knob.knobLoaded && knob.pointerLoaded;
+      }, "The knob should be loaded", 100);
+
+      runs(function() {
+        expect(knob.knob.src).toEqual(knobImg.src);
+        expect(knob.pointer.src).toEqual(pointerImg.src);
+      });
     });
 
     it("should default to the knob image's width and height", function() {
       var knobImg = new Image(),
           imgWidth, imgHeight;
       knobImg.src = 'img/knob.png';
+      knob = Knobicon('img/knob.png', 'img/pointer.png');
 
-      var knob = Knobicon('img/knob.png', 'img/pointer.png');
-      expect(knob.width).toBe(knobImg.width);
-      expect(knob.height).toBe(knobImg.height);
+      waitsFor(function() {
+        return knob.knobLoaded && knob.pointerLoaded;
+      }, "The knob should be loaded", 100);
+
+      runs(function() {
+        expect(knob.width).toBe(knobImg.width);
+        expect(knob.height).toBe(knobImg.height);
+      });
     });
 
     it("center coords should be half of the knob image's width and height", function() {
-      var knobImg = new Image(),
-          imgWidth, imgHeight;
-      knobImg.src = 'img/knob.png';
-      var knob = Knobicon('img/knob.png', 'img/pointer.png');
+      knob = Knobicon('img/knob.png', 'img/pointer.png');
 
-      expect(knob.centerX).toBe(knobImg.width/2);
-      expect(knob.centerY).toBe(knobImg.height/2);
+      waitsFor(function() {
+        return knob.knobLoaded && knob.pointerLoaded;
+      }, "The knob should be loaded", 100);
+
+      runs(function() {
+        expect(knob.centerX).toBe(knob.knob.width/2);
+        expect(knob.centerY).toBe(knob.knob.height/2);
+      });
     })
   });
 
@@ -60,14 +78,22 @@ describe('Knobicon', function() {
     });
 
     it("center coords should be half the supplied width and height", function() {
-      var height = 650, width = 325;
-      var knob = Knobicon('img/knob.png', 
+      var h = 650, w = 325;
+      var knob1 = Knobicon('img/knob.png', 
                           'img/pointer.png', 
-                          {height: height,
-                           width: width});
+                          {height: h, width: w});
 
-      expect(knob.centerX).toBe(width/2);
-      expect(knob.centerY).toBe(height/2);
+      waitsFor(function() {
+        return knob1.knobLoaded && knob1.pointerLoaded;
+      }, "The knob should be loaded", 200);
+
+
+      runs(function() {
+        // console.log(knob1);
+        // this fails, but logging it shows that the values are correct
+        expect(knob1.centerX).toBe(w/2);
+        expect(knob1.centerY).toBe(h/2);
+      });
     });
   });
 
@@ -79,6 +105,36 @@ describe('Knobicon', function() {
       var parent = document.createElement('div');
       knob.appendTo(parent);
       expect(parent.firstChild).toEqual(knob.context.canvas);
+    });
+  });
+
+
+  // Events
+  describe('MouseEvent', function(){
+    var knob = new Knobicon('img/knob.png', 'img/pointer.png', {knobRadius: 200});
+      var canvas = knob.context.canvas;
+
+    afterEach(function() {
+      document.body.removeChild(canvas);
+    });
+    it('mousedown inside radius should change dragging property to true', function() {
+
+      waitsFor(function() {
+        return knob.knobLoaded && knob.pointerLoaded;
+      }, "The knob should be loaded", 100);
+
+      runs(function() {
+        knob.appendTo(document.body);
+        var event = new MouseEvent('mousedown', {
+          'view': window,
+          'bubbles': true,
+          'cancelable': true,
+          'clientX': canvas.offsetLeft + knob.centerX,
+          'clientY': canvas.offsetTop + knob.centerY
+        });
+        canvas.dispatchEvent(event);
+        expect(knob.dragging).toBeTruthy();
+      });
     });
   });
 });
