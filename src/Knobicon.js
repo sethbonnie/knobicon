@@ -26,6 +26,16 @@
     return this;
   };
 
+  // Public API
+
+  Knobicon.prototype = {
+    appendTo: function(element) {
+      element.appendChild(this.context.canvas);
+    }
+  }
+
+  // Helpers
+
   function setCanvasSize() {
     // Defaults to the size of the knob image.
     if (typeof this.width !== 'undefined') {

@@ -70,4 +70,15 @@ describe('Knobicon', function() {
       expect(knob.centerY).toBe(height/2);
     });
   });
+
+  // Methods
+  describe('appendTo()', function(){
+
+    it('should add a canvas as a child to the passed in element', function() {
+      var knob = new Knobicon('img/knob.png', 'img/pointer.png');
+      var parent = document.createElement('div');
+      knob.appendTo(parent);
+      expect(parent.firstChild).toEqual(knob.context.canvas);
+    });
+  });
 });
