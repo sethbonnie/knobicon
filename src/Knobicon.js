@@ -71,6 +71,16 @@
         knob.dragging = true;
       }
     };
+
+    window.addEventListener('mouseup', function(e) {
+      var mouse = null;
+
+      e.preventDefault();
+
+      if (knob.dragging) {
+        knob.dragging = false;
+      }
+    }, false);
   }
 
   function windowToCanvas(x, y) {
