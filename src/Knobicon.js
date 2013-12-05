@@ -1,27 +1,36 @@
 (function() {
 
   Knobicon = function(knobImgSrc, pointerImgSrc, options) {
+    var self = this;
+
     if (arguments.length < 2 || 
         typeof knobImgSrc !== 'string' ||
         typeof pointerImgSrc !== 'string')
       throw new Error("Missing/invalid required argument");
 
     this.context = document.createElement('canvas').getContext('2d');
-    
-    this.pointer = loadImg(pointerImgSrc);
-    this.knob    = loadImg(knobImgSrc);
 
     if (options) {
       this.width  = typeof options.width !== 'undefined' ? options.width : undefined;
       this.height = typeof options.height !== 'undefined' ? options.height : undefined;
     }
 
-    setCanvasSize.apply(this, []);
-    this.centerX = this.context.canvas.width/2;
-    this.centerY = this.context.canvas.height/2;
+    this.init = function() {
+      options = options || {};
 
-    this.context.drawImage(this.knob, 0, 0, this.width, this.height);
-    this.context.drawImage(this.pointer, 0, 0, this.width, this.height);
+      setCanvasSize.apply(self, []);
+      this.centerX = this.context.canvas.width/2;
+      this.centerY = this.context.canvas.height/2;
+
+      self.knobRadius = options.knobRadius ? options.knobRadius : self.width / 2;
+
+      self.context.drawImage(self.knob, 0, 0, self.width, self.height);
+      self.context.drawImage(self.pointer, 0, 0, self.width, self.height);
+    };
+
+    loadImg.apply(this, [pointerImgSrc, 'pointer']);
+    loadImg.apply(this, [knobImgSrc, 'knob']);
+    addMouseHanders.apply(this,[]);
 
     return this;
   };
@@ -40,20 +49,74 @@
     // Defaults to the size of the knob image.
     if (typeof this.width !== 'undefined') {
       this.context.canvas.width = this.width
-    } else {
+    } else if (typeof this.knob !== 'undefined') {
       this.context.canvas.width = this.width = this.knob.width;
     }
     if (typeof this.height !== 'undefined') {
       this.context.canvas.height = this.height
-    } else {
+    } else if (typeof this.knob !== 'undefined') {
       this.context.canvas.height = this.height = this.knob.height;
     }
   }
 
-  function loadImg(src) {
-    var img = new Image();
-    img.src = src;
-    return img;
+  function addMouseHanders() {
+    var knob = this;
+
+    knob.context.canvas.onmousedown = function(e) {
+      var mouse = windowToCanvas.apply(knob, [e.clientX, e.clientY]);
+
+      e.preventDefault();
+
+      if (mouseInKnob.apply(knob, [mouse.x, mouse.y])) {
+        knob.dragging = true;
+      }
+    };
+
+    window.addEventListener('mouseup', function(e) {
+      var mouse = null;
+
+      e.preventDefault();
+
+      if (knob.dragging) {
+        knob.dragging = false;
+      }
+    }, false);
   }
 
+  function windowToCanvas(x, y) {
+    var bbox = this.context.canvas.getBoundingClientRect();
+
+    return {
+      x: x - bbox.left * (this.context.canvas.width / bbox.width),
+      y: y - bbox.top  * (this.context.canvas.height / bbox.height)
+    };
+  }
+
+  function mouseInKnob(x, y) {
+    var dx = this.centerX - x,
+        dy = this.centerY - y,
+        magnitude = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy,2));
+    return magnitude < this.knobRadius;
+  }
+
+  function loadImg(src, imgType) {
+    var self = this;
+    var img = new Image();
+    img.src = src;
+
+    img.onload = function(e) {
+      if (imgType == 'pointer') {
+        self.pointer = img;
+        self.pointerLoaded = true;
+        if (self.knobLoaded)
+          self.init();
+      }
+      if (imgType == 'knob') {
+        self.knob = img;
+        self.knobLoaded = true;
+        if (self.pointerLoaded)
+          self.init();
+      }
+    };
+  }
 })();

@@ -4,23 +4,16 @@
   <title>Knobicon Example</title>
 </head>
 <body>
-  <div id='knob1'></div>
-  <div id='knob2'></div>
+  <div id='knob'></div>
   <script src='../src/knobicon.js'></script>
   <script>
-    var knob1 = new Knobicon({pointerImgSrc: 'img/pointer.png',
-                             knobImgSrc: 'img/knob.png',
-                             width: 300,
-                             height: 300
-                           }),
-        knob2 = new Knobicon({
-          pointerImgSrc: 'img/VolumePointer.png',
-          knobImgSrc: 'img/VolumeKnob.png',
-          width: 200,
-          height: 200
+    var knob = new Knobicon(
+          'img/VolumeKnob.png','img/VolumePointer.png',
+        {
+          width: 500,
+          height: 500
         });
-    knob1.appendTo('knob1');
-    knob2.appendTo('knob2');
+    knob.appendTo(document.getElementById('knob'));
   </script>
 </body>
 </html>
