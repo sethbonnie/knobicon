@@ -8,12 +8,19 @@
         typeof pointerImgSrc !== 'string')
       throw new Error("Missing/invalid required argument");
 
-    this.context = document.createElement('canvas').getContext('2d');
-
     if (options) {
-      this.width  = typeof options.width !== 'undefined' ? options.width : undefined;
-      this.height = typeof options.height !== 'undefined' ? options.height : undefined;
+      this.width  = typeof options.width !== 'undefined' ? 
+                    options.width : 
+                    undefined;
+      this.height = typeof options.height !== 'undefined' ? 
+                    options.height : 
+                    undefined;
+      this.percent = typeof options.percent !== 'undefined' ?
+                     options.percent :
+                     50;
     }
+
+    this.context = document.createElement('canvas').getContext('2d');
 
     this.init = function() {
       options = options || {};
@@ -22,10 +29,15 @@
       this.centerX = this.context.canvas.width/2;
       this.centerY = this.context.canvas.height/2;
 
-      self.knobRadius = options.knobRadius ? options.knobRadius : self.width / 2;
+      self.knobRadius = options.knobRadius ? 
+                        options.knobRadius : 
+                        self.width / 2;
+      self.pointerRadius = options.pointerRadius ?
+                           options.pointerRadius : 
+                           self.knobRadius;
 
-      self.context.drawImage(self.knob, 0, 0, self.width, self.height);
-      self.context.drawImage(self.pointer, 0, 0, self.width, self.height);
+      self.drawKnob();
+      self.drawPointer(); 
     };
 
     loadImg.apply(this, [pointerImgSrc, 'pointer']);
@@ -35,32 +47,81 @@
     return this;
   };
 
+  // ================================================================
   // Public API
+  // ================================================================
 
   Knobicon.prototype = {
     appendTo: function(element) {
       element.appendChild(this.context.canvas);
+    },
+
+    rotateTo: function(angle) {
+      this.percent = parseFloat(angle);
+      // this.angle = boundedAngle(angle);
+      this.context.save();
+
+      this.erase();
+      this.drawKnob();
+      this.context.translate(this.centerX, this.centerY);
+      this.context.rotate(-angle + Math.PI/2);
+      this.context.translate(-this.centerX, -this.centerY);
+      this.drawPointer();
+
+      this.context.restore();
+    },
+
+    drawKnob: function() {
+      this.context.drawImage(this.knob, 0, 0, this.width, this.height);
+    },
+
+    drawPointer: function() {
+      this.context.drawImage(this.pointer, 0, 0, this.width, this.height);
+    },
+
+    erase: function() {
+      this.context.clearRect(0,0,this.width, this.height);
     }
   }
 
+  // ================================================================
   // Helpers
+  // ================================================================
 
   function setCanvasSize() {
     // Defaults to the size of the knob image.
     if (typeof this.width !== 'undefined') {
       this.context.canvas.width = this.width
-    } else if (typeof this.knob !== 'undefined') {
+    } 
+    else if (typeof this.knob !== 'undefined') {
       this.context.canvas.width = this.width = this.knob.width;
     }
+
     if (typeof this.height !== 'undefined') {
       this.context.canvas.height = this.height
-    } else if (typeof this.knob !== 'undefined') {
+    } 
+    else if (typeof this.knob !== 'undefined') {
       this.context.canvas.height = this.height = this.knob.height;
     }
   }
 
   function addMouseHanders() {
     var knob = this;
+
+    knob.context.canvas.onmousemove = function(e) {
+      var mouse = windowToCanvas.apply(knob, [e.clientX, e.clientY]);
+      var angle, dx, dy;
+
+      e.preventDefault();
+
+      if (knob.dragging) {
+        dx = knob.centerX - mouse.x;
+        dy = knob.centerY - mouse.y;
+        angle = atan2(dy, dx);
+        console.log(radiansToPercent(angle));
+        knob.rotateTo(angle);
+      }
+    }
 
     knob.context.canvas.onmousedown = function(e) {
       var mouse = windowToCanvas.apply(knob, [e.clientX, e.clientY]);
@@ -118,5 +179,54 @@
           self.init();
       }
     };
+  }
+
+  function toDegrees(radians) { return radians * 180 / Math.PI; }
+  function toRadians(degrees) { return degrees * Math.PI / 180; }
+
+  // A normalized version of Math.atan2 -- [0,-2π) instead of [-π,π)
+  function atan2(y, x) {
+    return -(Math.atan2(y,x) - Math.PI);
+  }
+
+  /*
+   * The range of movement will be 3π/2
+   * Starting from: 5π/4 as 0.0 (0%)
+   * Ending at: 7π/4 as 100 (100%)
+   * In a counter-clockwise rotation
+   *
+   * TODO: this function can be generalized to take
+   * a min, a max and a range
+   */
+  function radiansToPercent(angle) {
+    // For angles in the range (5π/4, 7π/4), set it as the one 
+    // closest of the two
+    if (angle > (5/4*Math.PI) && angle < (7/4*Math.PI)) {
+      angle = angle - (3/2*Math.PI) < 0 ? 
+              5/4*Math.PI : 
+              7/4*Math.PI;
+    }
+    // Normalize angle for values in the region [7π/4, 2π)
+    // since they are bigger than our range of 3π/2
+    if (angle >= (7/4*Math.PI) && angle < (2*Math.PI)) {
+      // everything works out if we just turn these values
+      // into their negative counterparts
+      angle = angle - 2*Math.PI;
+    }
+
+    // We add π/4 so that our minimum of 5π/4 is aligned with the range
+    return ((3/2*Math.PI - (angle + Math.PI/4)) / (3/2*Math.PI)).toFixed(2) * 100;
+  }
+
+  function percentToAngle(percent) {
+    // Normalize percent to be within [0,100]
+    if (percent < 0) {
+      percent = 0;
+    }
+    else if (percent > 100) {
+      percent = 100;
+    }
+
+    return (5/4 * Math.PI) - (3/2*Math.PI * percent/100);
   }
 })();
