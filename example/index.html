@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Knobicon Example</title>
+</head>
+<body>
+  <div id='knob'></div>
+  <script src='../src/knobicon.js'></script>
+  <script>
+    var knob = new Knobicon(
+          'img/VolumeKnob.png','img/VolumePointer.png',
+        {
+          width: 300,
+          height: 300
+        });
+    knob.appendTo(document.getElementById('knob'));
+  </script>
+</body>
+</html>
