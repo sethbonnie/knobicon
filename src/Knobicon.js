@@ -57,18 +57,24 @@
     },
 
     rotateTo: function(angle) {
-      this.percent = parseFloat(angle);
-      // this.angle = boundedAngle(angle);
-      this.context.save();
+      var percent = parseFloat( angleToPercent(angle) );
+      // only move pointer if percentage within 15%
+      // this eliminates huge jumps (especially the one from 0 to 100 
+      //  counter-clockwise)
+      if (percentageDiff(percent, this.percent) < 15) {
+        this.percent = percent;
+        this.angle = percentToAngle(this.percent);
+        this.context.save();
 
-      this.erase();
-      this.drawKnob();
-      this.context.translate(this.centerX, this.centerY);
-      this.context.rotate(-angle + Math.PI/2);
-      this.context.translate(-this.centerX, -this.centerY);
-      this.drawPointer();
+        this.erase();
+        this.drawKnob();
+        this.context.translate(this.centerX, this.centerY);
+        this.context.rotate(-this.angle + Math.PI/2);
+        this.context.translate(-this.centerX, -this.centerY);
+        this.drawPointer();
 
-      this.context.restore();
+        this.context.restore();
+      }
     },
 
     drawKnob: function() {
@@ -118,7 +124,6 @@
         dx = knob.centerX - mouse.x;
         dy = knob.centerY - mouse.y;
         angle = atan2(dy, dx);
-        console.log(radiansToPercent(angle));
         knob.rotateTo(angle);
       }
     }
@@ -193,12 +198,12 @@
    * The range of movement will be 3π/2
    * Starting from: 5π/4 as 0.0 (0%)
    * Ending at: 7π/4 as 100 (100%)
-   * In a counter-clockwise rotation
+   * In a clockwise rotation
    *
    * TODO: this function can be generalized to take
-   * a min, a max and a range
+   * a min, a max and a range that default to current values
    */
-  function radiansToPercent(angle) {
+  function angleToPercent(angle) {
     // For angles in the range (5π/4, 7π/4), set it as the one 
     // closest of the two
     if (angle > (5/4*Math.PI) && angle < (7/4*Math.PI)) {
@@ -227,6 +232,10 @@
       percent = 100;
     }
 
-    return (5/4 * Math.PI) - (3/2*Math.PI * percent/100);
+    return (5/4 * Math.PI) - ((3/2*Math.PI * percent) / 100);
+  }
+
+  function percentageDiff(p1, p2) {
+    return Math.abs(p1 - p2);
   }
 })();
