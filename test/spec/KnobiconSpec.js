@@ -97,8 +97,7 @@ describe('Knobicon', function() {
     });
   });
 
-  // Methods
-  describe('appendTo()', function(){
+  describe('appendTo(parentElem)', function(){
 
     it('should add a canvas as a child to the passed in element', function() {
       var knob = new Knobicon('img/knob.png', 'img/pointer.png');
@@ -108,11 +107,9 @@ describe('Knobicon', function() {
     });
   });
 
-
-  // Events
   describe('MouseEvent', function(){
     var knob = new Knobicon('img/knob.png', 'img/pointer.png', {knobRadius: 200});
-      var canvas = knob.context.canvas;
+    var canvas = knob.context.canvas;
 
     beforeEach(function() {
       waitsFor(function() {
@@ -175,4 +172,72 @@ describe('Knobicon', function() {
       });
     });
   });
+
+  describe('#rotateTo(angle)', function() {
+    var knob;
+    var rotationAmount = 3/2*Math.PI * 0.10; // 10% of total range
+
+    beforeEach(function() {
+      knob = new Knobicon('img/knob.png', 'img/pointer.png', {knobRadius: 200});
+    });
+
+    describe("rotating to the min angle", function() {
+      it("should change knob percentage to 0", function() {
+        var angle = knob.angle;
+        while (angle < 5/4*Math.PI) {
+          angle += rotationAmount;
+          knob.rotateTo(angle);
+        }
+        expect(parseFloat(knob.percent)).toEqual(0);
+      });
+    });
+
+    describe("rotating to the max angle", function() {
+      it("should change knob percentage to 100",function() {
+        var angle = knob.angle;
+        while (angle > (7/4*Math.PI - 2*Math.PI)) {
+          angle -= rotationAmount
+          knob.rotateTo(angle);
+        }
+        expect(parseFloat(knob.percent)).toEqual(100);
+      });
+    });
+
+    describe("rotating to an angle between min and max", function() {
+      it("should be min when angle is closer to min", function() {
+        var angle = knob.angle;
+        while (angle < 5/4*Math.PI) {
+          angle += rotationAmount;
+          knob.rotateTo(angle);
+        }
+        // Once more for good measure
+        angle += rotationAmount;
+        knob.rotateTo(angle);
+        expect(knob.angle).toEqual(5/4*Math.PI);
+      });
+
+      it("should be max when angle is closer to max", function() {
+        var angle = knob.angle;
+        while (angle > (7/4*Math.PI - 2*Math.PI)) {
+          angle -= rotationAmount
+          knob.rotateTo(angle);
+        }
+        // Once more for good measure
+        angle -= rotationAmount;
+        knob.rotateTo(angle);
+        expect(knob.angle).toEqual(7/4*Math.PI -2*Math.PI);
+      });
+    });
+
+    describe("rotating by an angle greater than 15% of range", function() {
+      it("should not change the state of the knob", function() {
+        expect(knob.angle).toEqual(Math.PI/2);
+        // rotationAmount == 10%
+        knob.rotateTo(knob.angle + (rotationAmount * 2));
+        expect(knob.angle).toEqual(Math.PI/2);
+      });
+        
+    });
+  });
+  
 });
