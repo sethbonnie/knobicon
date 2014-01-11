@@ -107,8 +107,6 @@ describe('Knobicon', function() {
     });
   });
 
-
-  // Events
   describe('MouseEvent', function(){
     var knob = new Knobicon('img/knob.png', 'img/pointer.png', {knobRadius: 200});
     var canvas = knob.context.canvas;
@@ -175,7 +173,6 @@ describe('Knobicon', function() {
     });
   });
 
-  // Rotations
   describe('#rotateTo(angle)', function() {
     var knob;
     var rotationAmount = 3/2*Math.PI * 0.10; // 10% of total range
