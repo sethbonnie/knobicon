@@ -52,7 +52,8 @@ describe('Knobicon', function() {
       });
     });
 
-    it("center coords should be half of the knob image's width and height", function() {
+    it("center coords should be half of the knob image's width and height", 
+    function() {
       knob = Knobicon('img/knob.png', 'img/pointer.png');
 
       waitsFor(function() {
@@ -121,7 +122,8 @@ describe('Knobicon', function() {
       document.body.removeChild(canvas);
     });
 
-    it('mousedown inside radius should change dragging property to true', function() {
+    it('mousedown inside radius should change dragging property to true', 
+    function() {
       knob.dragging = false;
 
       runs(function() {
@@ -138,7 +140,8 @@ describe('Knobicon', function() {
       });
     });
 
-    it('mousedown outside radius should not change dragging property to true', function() {
+    it('mousedown outside radius should not change dragging property to true', 
+    function() {
       knob.dragging = false;
 
       runs(function() {
@@ -235,9 +238,29 @@ describe('Knobicon', function() {
         // rotationAmount == 10%
         knob.rotateTo(knob.angle + (rotationAmount * 2));
         expect(knob.angle).toEqual(Math.PI/2);
-      });
-        
+      });   
     });
   });
-  
+
+  describe("#onRotate(handler)", function() {
+    var knob;
+    var rotationAmount = 3/2*Math.PI * 0.10; // 10% of total range
+
+    beforeEach(function() {
+      knob = new Knobicon('img/knob.png', 'img/pointer.png', {knobRadius: 200});
+    });
+
+    it("should pass in the updated percentage to the handler on each rotation", 
+    function() {
+      var percentage;
+
+      expect(percentage).not.toEqual(knob.percent);
+      knob.onRotate(function(percent) {
+        percentage = percent;
+      });
+
+      knob.rotateTo(knob.angle + rotationAmount);
+      expect(percentage).toEqual(knob.percent);
+    });
+  });
 });

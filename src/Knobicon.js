@@ -21,6 +21,7 @@
     }
 
     this.angle = percentToAngle(this.percent);
+    this.changeListeners = [];
 
     this.context = document.createElement('canvas').getContext('2d');
 
@@ -65,6 +66,7 @@
       //  counter-clockwise)
       if (percentageDiff(percent, this.percent) < 15) {
         this.percent = percent;
+        fireChangeEvent.apply(this,[]);
         this.angle = percentToAngle(this.percent);
         this.context.save();
 
@@ -77,12 +79,23 @@
 
         this.context.restore();
       }
+    },
+
+    onRotate: function(handler) {
+      this.changeListeners.push(handler);
     }
   }
 
   // ================================================================
   // Private Methods
   // ================================================================
+
+  var fireChangeEvent = function() {
+    if (this.changeListeners) {
+      for (var i = 0; i < this.changeListeners.length; i++)
+        this.changeListeners[i](this.percent);
+    }
+  }
 
   var erase = function() {
     if (this.context) {
