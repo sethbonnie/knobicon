@@ -68,7 +68,7 @@
         this.angle = percentToAngle(this.percent);
         this.context.save();
 
-        this.erase();
+        erase.apply(this, []);
         drawKnob.apply(this,[]);
         this.context.translate(this.centerX, this.centerY);
         this.context.rotate(-this.angle + Math.PI/2);
@@ -77,16 +77,18 @@
 
         this.context.restore();
       }
-    },
-
-    erase: function() {
-      this.context.clearRect(0,0,this.width, this.height);
     }
   }
 
   // ================================================================
-  // Helpers
+  // Private Methods
   // ================================================================
+
+  var erase = function() {
+    if (this.context) {
+      this.context.clearRect(0,0,this.width, this.height);
+    }
+  }
 
   var drawKnob = function() {
     if (this.knob)
@@ -189,6 +191,10 @@
       }
     };
   }
+
+  // ================================================================
+  // Helpers Methods
+  // ================================================================
 
   function toDegrees(radians) { return radians * 180 / Math.PI; }
   function toRadians(degrees) { return degrees * Math.PI / 180; }
