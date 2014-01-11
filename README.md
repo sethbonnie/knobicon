@@ -1,7 +1,7 @@
 Knobicon
 ========
 
-Canvas-based knobs that are created from 2 images: a knob image and an pointer/indicator image. These are layed images 
+Canvas-based knobs that are created from 2 layered images: a knob image and an pointer/indicator image.
 
 Usage
 ------
