@@ -20,6 +20,8 @@
                      50;
     }
 
+    this.angle = percentToAngle(this.percent);
+
     this.context = document.createElement('canvas').getContext('2d');
 
     this.init = function() {
@@ -36,8 +38,8 @@
                            options.pointerRadius : 
                            self.knobRadius;
 
-      self.drawKnob();
-      self.drawPointer(); 
+      drawKnob.apply(this, []);
+      drawPointer.apply(this, []);
     };
 
     loadImg.apply(this, [pointerImgSrc, 'pointer']);
@@ -67,22 +69,14 @@
         this.context.save();
 
         this.erase();
-        this.drawKnob();
+        drawKnob.apply(this,[]);
         this.context.translate(this.centerX, this.centerY);
         this.context.rotate(-this.angle + Math.PI/2);
         this.context.translate(-this.centerX, -this.centerY);
-        this.drawPointer();
+        drawPointer.apply(this,[]);
 
         this.context.restore();
       }
-    },
-
-    drawKnob: function() {
-      this.context.drawImage(this.knob, 0, 0, this.width, this.height);
-    },
-
-    drawPointer: function() {
-      this.context.drawImage(this.pointer, 0, 0, this.width, this.height);
     },
 
     erase: function() {
@@ -93,6 +87,16 @@
   // ================================================================
   // Helpers
   // ================================================================
+
+  var drawKnob = function() {
+    if (this.knob)
+      this.context.drawImage(this.knob, 0, 0, this.width, this.height);
+  };
+
+  var drawPointer = function() {
+    if (this.pointer)
+      this.context.drawImage(this.pointer, 0, 0, this.width, this.height);
+  };
 
   function setCanvasSize() {
     // Defaults to the size of the knob image.
