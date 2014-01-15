@@ -1,8 +1,6 @@
 (function() {
 
   Knobicon = function(knobImgSrc, pointerImgSrc, options) {
-    var self = this;
-
     if (arguments.length < 2 || 
         typeof knobImgSrc !== 'string' ||
         typeof pointerImgSrc !== 'string')
@@ -25,14 +23,12 @@
     this.context = document.createElement('canvas').getContext('2d');
 
     this.init = function() {
-      options = options || {};
-
-      self.knobRadius = options.knobRadius ? 
+      this.knobRadius = options.knobRadius ? 
                         options.knobRadius : 
-                        self.width / 2;
-      self.pointerRadius = options.pointerRadius ?
+                        this.width / 2;
+      this.pointerRadius = options.pointerRadius ?
                            options.pointerRadius : 
-                           self.knobRadius;
+                           this.knobRadius;
 
       this.context.canvas.width = this.width;
       this.context.canvas.height = this.height;
