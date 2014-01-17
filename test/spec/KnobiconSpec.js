@@ -35,34 +35,41 @@ describe('Knobicon', function() {
         expect(knob.pointer.src).toEqual(pointerImg.src);
       });
     });
+  });
 
-    it("should default to the knob image's width and height", function() {
-      var knobImg = new Image(),
-          imgWidth, imgHeight;
-      knobImg.src = 'img/knob.png';
-      knob = Knobicon('img/knob.png', 'img/pointer.png');
+  describe("width and height", function() {
+    var knobElem, knob;
 
-      waitsFor(function() {
-        return knob.knobLoaded && knob.pointerLoaded;
-      }, "The knob should be loaded", 100);
-
-      runs(function() {
-        expect(knob.width).toBe(knobImg.width);
-        expect(knob.height).toBe(knobImg.height);
-      });
+    beforeEach(function() {
+      knobElem = document.createElement('div');
+      knobElem.style.width = '300px';
+      knobElem.style.height = '300px';
+      knob = new Knobicon('img/knob.png', 'img/pointer.png');
+      knob.appendTo(knobElem);
     });
 
-    it("center coords should be half of the knob image's width and height", 
-    function() {
-      knob = Knobicon('img/knob.png', 'img/pointer.png');
+    it("should default to the parent element's width and height", function() {
+      waitsFor(function() {
+        return knob.knobLoaded && knob.pointerLoaded;
+      }, "The knob should be loaded", 100);
 
+      var elemWidth = parseInt(knobElem.style.width);
+      var elemHeight = parseInt(knobElem.style.height);
+      expect(knob.width).toEqual(elemWidth);
+      expect(knob.height).toEqual(elemHeight);
+    });
+
+    it("center coords should be half of the knob element's width/height", 
+    function() {
       waitsFor(function() {
         return knob.knobLoaded && knob.pointerLoaded;
       }, "The knob should be loaded", 100);
 
       runs(function() {
-        expect(knob.centerX).toBe(knob.knob.width/2);
-        expect(knob.centerY).toBe(knob.knob.height/2);
+        var width = parseInt(knobElem.style.width),
+            height = parseInt(knobElem.style.height);
+        expect(knob.centerX).toBe(width/2);
+        expect(knob.centerY).toBe(height/2);
       });
     })
   });

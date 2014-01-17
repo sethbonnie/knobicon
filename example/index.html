@@ -2,17 +2,19 @@
 <html>
 <head>
   <title>Knobicon Example</title>
+  <style>
+  #knob {
+    width: 300px;
+    height: 300px;
+  }
+  </style>
 </head>
 <body>
-  <div id='knob'></div>
+  <div id='knob' width='200px' height='200px'></div>
   <script src='../src/knobicon.js'></script>
   <script>
     var knob = new Knobicon(
-          'img/VolumeKnob.png','img/VolumePointer.png',
-        {
-          width: 300,
-          height: 300
-        });
+          'img/VolumeKnob.png','img/VolumePointer.png');
     knob.appendTo(document.getElementById('knob'));
   </script>
 </body>

@@ -1,24 +1,21 @@
 (function() {
 
   Knobicon = function(knobImgSrc, pointerImgSrc, options) {
-    var self = this;
-
     if (arguments.length < 2 || 
         typeof knobImgSrc !== 'string' ||
         typeof pointerImgSrc !== 'string')
       throw new Error("Missing/invalid required argument");
 
-    if (options) {
-      this.width  = typeof options.width !== 'undefined' ? 
-                    options.width : 
-                    undefined;
-      this.height = typeof options.height !== 'undefined' ? 
-                    options.height : 
-                    undefined;
-      this.percent = typeof options.percent !== 'undefined' ?
-                     options.percent :
-                     50;
-    }
+    var options = options || {};
+    this.width  = typeof options.width !== 'undefined' ? 
+                  options.width : 
+                  100;
+    this.height = typeof options.height !== 'undefined' ? 
+                  options.height : 
+                  100;
+    this.percent = typeof options.percent !== 'undefined' ?
+                   options.percent :
+                   50;
 
     this.angle = percentToAngle(this.percent);
     this.changeListeners = [];
@@ -26,18 +23,17 @@
     this.context = document.createElement('canvas').getContext('2d');
 
     this.init = function() {
-      options = options || {};
+      this.knobRadius = options.knobRadius ? 
+                        options.knobRadius : 
+                        this.width / 2;
+      this.pointerRadius = options.pointerRadius ?
+                           options.pointerRadius : 
+                           this.knobRadius;
 
-      setCanvasSize.apply(self, []);
+      this.context.canvas.width = this.width;
+      this.context.canvas.height = this.height;
       this.centerX = this.context.canvas.width/2;
       this.centerY = this.context.canvas.height/2;
-
-      self.knobRadius = options.knobRadius ? 
-                        options.knobRadius : 
-                        self.width / 2;
-      self.pointerRadius = options.pointerRadius ?
-                           options.pointerRadius : 
-                           self.knobRadius;
 
       drawKnob.apply(this, []);
       drawPointer.apply(this, []);
@@ -57,6 +53,7 @@
   Knobicon.prototype = {
     appendTo: function(element) {
       element.appendChild(this.context.canvas);
+      setCanvasSize.apply(this, [element]);
     },
 
     rotateTo: function(angle) {
@@ -113,21 +110,22 @@
       this.context.drawImage(this.pointer, 0, 0, this.width, this.height);
   };
 
-  function setCanvasSize() {
+  function setCanvasSize(parentElem) {
+    var elemWidth = window.getComputedStyle(parentElem)
+                          .getPropertyValue('width');
+    var elemHeight = window.getComputedStyle(parentElem)
+                           .getPropertyValue('height');
     // Defaults to the size of the knob image.
-    if (typeof this.width !== 'undefined') {
-      this.context.canvas.width = this.width
-    } 
-    else if (typeof this.knob !== 'undefined') {
-      this.context.canvas.width = this.width = this.knob.width;
-    }
+    this.width = parseInt(elemWidth);
+    this.height = parseInt(elemHeight);
 
-    if (typeof this.height !== 'undefined') {
-      this.context.canvas.height = this.height
-    } 
-    else if (typeof this.knob !== 'undefined') {
-      this.context.canvas.height = this.height = this.knob.height;
+    if (this.context) {
+      this.context.canvas.width = this.width;
+      this.context.canvas.height = this.height;
+      this.centerX = this.context.canvas.width/2;
+      this.centerY = this.context.canvas.height/2;
     }
+    this.knobRadius = this.width/2;
   }
 
   function addMouseHanders() {
