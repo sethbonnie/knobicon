@@ -7,7 +7,7 @@ Usage
 ------
 
     var knobElement = document.getElementById('knob');
-    var knob = new Knobicon('knob.png', 'pointer');
+    var knob = new Knobicon('knob.png', 'pointer.png');
     knob.appendTo(knobElement);
 
 Todo
